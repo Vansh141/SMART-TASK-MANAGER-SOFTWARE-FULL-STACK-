@@ -1,0 +1,116 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: white;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+}
+
+.task-form {
+  margin: 20px;
+}
+
+input, select, button {
+  padding: 8px;
+  margin: 5px;
+}
+
+li {
+  list-style: none;
+  background: #1e293b;
+  margin: 10px auto;
+  padding: 10px;
+  width: 60%;
+  border-radius: 8px;
+}
+
+.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+body.light {
+  background: #f4f6fb;
+  color: #111;
+}
+
+body.light .task-form,
+body.light li {
+  background: #ffffff;
+  color: #111;
+}
+
+.task.dragging {
+  opacity: 0.5;
+  transform: scale(1.03);
+  cursor: grabbing;
+}
+
+.task {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.task {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  transition: all 0.25s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+}
+
+.task:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55);
+}
+
+button {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+}
+
+.completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.task.dragging {
+  opacity: 0.4;
+  transform: scale(1.05) rotate(1deg);
+  cursor: grabbing;
+}
+
+#taskList {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 0;
+  list-style: none;
+}
+
+.task-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}

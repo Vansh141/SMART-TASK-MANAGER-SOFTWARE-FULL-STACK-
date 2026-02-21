@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Task Manager</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>🚀 Smart Task Manager</h1>
+
+  <!-- 🔐 AUTH SECTION -->
+  <div id="authSection">
+    <h2>Register</h2>
+    <input id="regName" placeholder="Name" />
+    <input id="regEmail" placeholder="Email" />
+    <input id="regPassword" type="password" placeholder="Password" />
+    <button onclick="register()">Register</button>
+
+    <h2>Login</h2>
+    <input id="loginEmail" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- ✅ TASK APP (hidden until login) -->
+  <div id="taskSection" style="display:none;">
+    <div class="task-form">
+      <input type="text" id="taskInput" placeholder="Enter task..." />
+
+      <select id="priority">
+        <option>Low</option>
+        <option selected>Medium</option>
+        <option>High</option>
+      </select>
+
+      <input type="date" id="dueDate" />
+      <button onclick="addTask()">Add Task</button>
+      <button onclick="logout()">Logout</button>
+      <button onclick="toggleTheme()">🌙 Toggle Theme</button>
+    </div>
+
+    <ul id="taskList"></ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
