@@ -1,3 +1,5 @@
+const errorHandler = require("./middleware/errorHandler");
+
 require("dotenv").config();
 
 // added for user authentication
@@ -25,37 +27,57 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Get all tasks
 app.get("/tasks", auth, async (req, res) => {
-  const tasks = await Task.find({ user: req.userId });
+  const tasks = await Task
+  .find({ user: req.userId })
+  .sort({ order: 1 });
   res.json(tasks);
 });
 
 // Add new task
-app.post("/tasks", auth, async (req, res) => {
-  const task = new Task({
-    ...req.body,
-    user: req.userId
-  });
+app.post("/tasks", auth, async (req, res, next) => {
+  try {
+    const { text, priority, dueDate } = req.body;
 
-  await task.save();
-  res.json(task);
+    if (!text || text.trim().length < 2) {
+      const err = new Error("Task text too short");
+      err.status = 400;
+      throw err;
+    }
+
+    const task = new Task({
+      text,
+      priority,
+      dueDate,
+      user: req.userId
+    });
+
+    await task.save();
+    res.json({ success: true, task });
+
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.post("/register", async (req, res) => {
+app.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
+    if (!name || !email || !password) {
+      const err = new Error("All fields required");
+      err.status = 400;
+      throw err;
+    }
+
     const hashed = await bcrypt.hash(password, 10);
 
-    const user = new User({
-      name,
-      email,
-      password: hashed
-    });
-
+    const user = new User({ name, email, password: hashed });
     await user.save();
-    res.json({ message: "User registered" });
+
+    res.json({ success: true, message: "User registered" });
+
   } catch (err) {
-    res.status(500).json({ error: "Registration failed" });
+    next(err);
   }
 });
 
@@ -105,6 +127,9 @@ app.delete("/tasks/:id", async (req, res) => {
   await Task.findByIdAndDelete(req.params.id);
   res.json({ success: true });
 });
+
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
