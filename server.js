@@ -88,20 +88,15 @@ app.put("/tasks/:id/toggle", auth, async (req, res) => {
 app.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-
     if (!name || !email || !password) {
       const err = new Error("All fields required");
       err.status = 400;
       throw err;
     }
-
     const hashed = await bcrypt.hash(password, 10);
-
     const user = new User({ name, email, password: hashed });
     await user.save();
-
     res.json({ success: true, message: "User registered" });
-
   } catch (err) {
     next(err);
   }
@@ -110,18 +105,50 @@ app.post("/register", async (req, res, next) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "User not found" });
-
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ error: "Wrong password" });
-
     const token = jwt.sign({ id: user._id }, JWT_SECRET);
-
     res.json({ token });
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
+  }
+});
+
+// Forgot Password
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "User not found" });
+    user.generatePasswordReset();
+    await user.save();
+    // TODO: Send email with reset link (demo: log to console)
+    const resetUrl = `${req.protocol}://${req.get("host")}/reset.html#${user.resetPasswordToken}`;
+    console.log(`Password reset link for ${email}: ${resetUrl}`);
+    res.json({ message: "Reset link sent" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to send reset link" });
+  }
+});
+
+// Reset Password
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+    if (!user) return res.status(400).json({ error: "Invalid or expired token" });
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to reset password" });
   }
 });
 

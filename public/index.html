@@ -1,51 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Task Manager</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>🚀 Smart Task Manager</h1>
+  <!-- Header/Navbar -->
+  <header>
+    <nav class="navbar">
+      <div class="navbar-logo">🧠 Smart Task Manager</div>
+      <div class="navbar-user" id="navbar-user" style="display:none;">
+        <span id="user-info"></span>
+        <button class="navbar-btn" id="logout-btn">Logout</button>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">🌙</button>
+      </div>
+      <div class="navbar-auth" id="navbar-auth">
+        <button class="theme-toggle" id="theme-toggle-auth" title="Toggle Theme">🌙</button>
+      </div>
+    </nav>
+  </header>
 
-  <!-- 🔐 AUTH SECTION -->
-  <div id="authSection">
-    <h2>Register</h2>
-<form onsubmit="event.preventDefault(); register();">
-  <input id="regName" placeholder="Name" />
-  <input id="regEmail" placeholder="Email" autocomplete="email" />
-  <input id="regPassword" type="password" placeholder="Password" autocomplete="new-password" />
-  <button type="submit">Register</button>
-</form>
+  <main>
+    <!-- Authentication Section -->
+    <section id="auth-section">
+      <form id="register-form">
+        <h2>Register</h2>
+        <input type="text" id="register-name" placeholder="Name" required>
+        <input type="email" id="register-email" placeholder="Email" required autocomplete="email">
+        <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password">
+        <button type="submit">Register</button>
+      </form>
+      <form id="login-form">
+        <h2>Login</h2>
+        <input type="email" id="login-email" placeholder="Email" required autocomplete="username">
+        <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
+        <button type="submit">Login</button>
+        <p><a href="#" id="show-forgot">Forgot Password?</a></p>
+      </form>
+      <form id="forgot-form" style="display:none;">
+        <h2>Forgot Password</h2>
+        <input type="email" id="forgot-email" placeholder="Enter your email" required>
+        <button type="submit">Send Reset Link</button>
+        <p><a href="#" id="back-login">Back to Login</a></p>
+      </form>
+      <form id="reset-form" style="display:none;">
+        <h2>Reset Password</h2>
+        <input type="password" id="reset-password" placeholder="New Password" required>
+        <button type="submit">Reset Password</button>
+      </form>
+    </section>
 
-    <h2>Login</h2>
-<form onsubmit="event.preventDefault(); login();">
-  <input id="loginEmail" placeholder="Email" autocomplete="username" />
-  <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" />
-  <button type="submit">Login</button>
-</form>
-  </div>
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" style="display:none;">
+      <div id="dashboard-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+        <h2>Dashboard</h2>
+      </div>
+      <form id="task-form">
+        <input type="text" id="task-title" placeholder="Task Title" required>
+        <textarea id="task-desc" placeholder="Task Description"></textarea>
+        <select id="priority">
+          <option value="Low">Low</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="High">High</option>
+        </select>
+        <input type="date" id="due-date">
+        <button type="submit">Add Task</button>
+      </form>
+      <div id="loading" class="loading" style="display:none;">Loading tasks...</div>
+      <div id="empty-state" class="empty-state" style="display:none;">No tasks yet. Start by adding your first task!</div>
+      <ul id="taskList" class="task-list"></ul>
+    </section>
+  </main>
 
-  <!-- ✅ TASK APP (hidden until login) -->
-  <div id="taskSection" style="display:none;">
-    <div class="task-form">
-      <input type="text" id="taskInput" placeholder="Enter task..." />
+  <!-- Toast Notifications -->
+  <div id="toast" class="toast"></div>
 
-      <select id="priority">
-        <option>Low</option>
-        <option selected>Medium</option>
-        <option>High</option>
-      </select>
-
-      <input type="date" id="dueDate" />
-      <button onclick="addTask()">Add Task</button>
-      <button onclick="logout()">Logout</button>
-      <button onclick="toggleTheme()">🌙 Toggle Theme</button>
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Home</a>
+      <a href="#" class="footer-link">About</a>
+      <a href="#" class="footer-link">Contact</a>
     </div>
-
-    <ul id="taskList"></ul>
-  </div>
+    <div>&copy; 2026 Smart Task Manager. All rights reserved.</div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
