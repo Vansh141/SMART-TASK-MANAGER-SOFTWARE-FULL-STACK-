@@ -10,6 +10,7 @@ const User = require("./models/User");
 
 const mongoose = require("mongoose");
 const Task = require("./models/Task");
+const auth = require("./middleware/auth");
 
 const express = require("express");
 const app = express();
@@ -25,37 +26,62 @@ mongoose.connect(process.env.MONGO_URI)
 
 
 
-// Get all tasks
+// Get tasks for logged-in user
 app.get("/tasks", auth, async (req, res) => {
-  const tasks = await Task
-  .find({ user: req.userId })
-  .sort({ order: 1 });
-  res.json(tasks);
+  try {
+    const tasks = await Task.find({ user: req.user.id }).sort({ createdAt: -1 });
+    res.json(tasks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch tasks" });
+  }
 });
 
 // Add new task
+
 app.post("/tasks", auth, async (req, res, next) => {
   try {
     const { text, priority, dueDate } = req.body;
 
-    if (!text || text.trim().length < 2) {
-      const err = new Error("Task text too short");
-      err.status = 400;
-      throw err;
+    if (!text || text.trim().length < 3) {
+      return res.status(400).json({ message: "Task text too short" });
     }
 
     const task = new Task({
       text,
       priority,
       dueDate,
-      user: req.userId
+      user: req.user.id,
     });
 
     await task.save();
-    res.json({ success: true, task });
+    res.status(201).json(task);
 
   } catch (err) {
-    next(err);
+    console.error(err);
+    res.status(500).json({ error: "Task creation failed" }); // ✅ ONLY HERE
+  }
+});
+
+// Toggle task completion
+app.put("/tasks/:id/toggle", auth, async (req, res) => {
+  try {
+    const task = await Task.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    });
+
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    task.completed = !task.completed;
+    await task.save();
+
+    res.json(task);
+  } catch (err) {
+    console.error("Toggle error:", err);
+    res.status(500).json({ error: "Toggle failed" });
   }
 });
 
@@ -99,35 +125,27 @@ app.post("/login", async (req, res) => {
   }
 });
 
-function auth(req, res, next) {
-  const header = req.headers.authorization;
-  if (!header) return res.status(401).json({ error: "No token" });
-
-  const token = header.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.id;
-    next();
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
-  }
-}
-
-// Toggle complete
-app.put("/tasks/:id", async (req, res) => {
-  const task = await Task.findById(req.params.id);
-  task.completed = !task.completed;
-  await task.save();
-  res.json({ success: true });
-});
 
 // Delete task
-app.delete("/tasks/:id", async (req, res) => {
-  await Task.findByIdAndDelete(req.params.id);
-  res.json({ success: true });
-});
+// Delete task
+app.delete("/tasks/:id", auth, async (req, res) => {
+  try {
+    const task = await Task.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user.id,
+    });
 
+    if (!task) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    res.json({ message: "Task deleted" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+      
 
 app.use(errorHandler);
 

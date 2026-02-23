@@ -5,11 +5,15 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: white;
-  min-height: 100vh;
   font-family: 'Poppins', sans-serif;
+  background: #f1f5f9;   /* ✅ LIGHT background */
+  color: #111827;        /* ✅ DARK text */
+  min-height: 100vh;
+}
+
+body.dark {
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: #e5e7eb;
 }
 
 .task-form {
@@ -52,21 +56,7 @@ body.light li {
   cursor: grabbing;
 }
 
-.task {
-  cursor: grab;
-  transition: all 0.2s ease;
-}
 
-.task {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin: 12px 0;
-  transition: all 0.25s ease;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-}
 
 .task:hover {
   transform: translateY(-3px) scale(1.01);
@@ -113,4 +103,147 @@ button:hover {
   justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 25px;
+}
+
+/* ✅ due date status colors */
+
+.task.overdue {
+  border-left: 5px solid #ff4d4f;
+  background: #fff1f0;
+}
+
+.task.today {
+  border-left: 5px solid #faad14;
+  background: #fffbe6;
+}
+
+.task.done {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.task.normal {
+  border-left: 5px solid #52c41a;
+}
+
+/* ===== PRO DASHBOARD UPGRADE ===== */
+
+body {
+  background: linear-gradient(135deg, #f5f7ff 0%, #eef1ff 100%);
+}
+
+/* header polish */
+h1 {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* input bar container */
+.top-bar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.task {
+  background: #ffffff;          /* light card */
+  color: #111827;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: all 0.25s ease;
+  cursor: grab;
+}
+
+.task strong {
+  color: inherit;
+}
+
+.task:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+}
+
+/* buttons polish */
+button {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* ✅ task action buttons only */
+
+.task button {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-right: 6px;
+}
+
+.task button:hover {
+  transform: translateY(-1px);
+}
+
+/* ✔ complete button */
+.task button.complete-btn {
+  background: linear-gradient(135deg, #6a5cff, #8f7bff);
+  color: white;
+}
+
+/* ❌ delete button */
+.task button.delete-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ff4d4f);
+  color: #ffffff;              /* ⭐ FIX — white X */
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task button.delete-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 18px rgba(255, 77, 79, 0.4);
+}
+
+/* ===== DARK MODE ===== */
+
+body.dark {
+  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+  color: #e5e7eb;
+}
+
+body.dark .top-bar {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+body.dark .task {
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+body.dark input,
+body.dark select {
+  background: #020617;
+  color: #e5e7eb;
+  border: 1px solid #334155;
+}
+
+body.dark .container {
+  background: transparent;
+}
+
+body.dark .top-bar {
+  backdrop-filter: blur(10px);
 }

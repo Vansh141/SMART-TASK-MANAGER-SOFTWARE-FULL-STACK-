@@ -1,3 +1,20 @@
+function getDueStatus(dueDate, completed) {
+  if (completed) return "done";
+
+  if (!dueDate) return "normal";
+
+  const today = new Date();
+  const due = new Date(dueDate);
+
+  // remove time for accurate compare
+  today.setHours(0,0,0,0);
+  due.setHours(0,0,0,0);
+
+  if (due < today) return "overdue";
+  if (due.getTime() === today.getTime()) return "today";
+  return "normal";
+}
+
 let draggedItem = null;
 const taskList = document.getElementById("taskList");
 taskList.addEventListener("dragover", (e) => {
@@ -79,6 +96,9 @@ async function fetchTasks() {
   tasks.forEach(task => {
     const li = document.createElement("li");
     li.classList.add("task");
+    const status = getDueStatus(task.dueDate, task.completed);
+  li.classList.add(status);
+
     li.setAttribute("draggable", "true");
     li.setAttribute("data-id", task._id);
     li.addEventListener("dragstart", () => {
@@ -95,8 +115,8 @@ li.addEventListener("dragend", () => {
     li.innerHTML = `
       <strong>${task.text}</strong><br>
       Priority: ${task.priority} | Due: ${task.dueDate || "None"}<br>
-      <button onclick="toggleTask('${task._id}')">✔</button>
-      <button onclick="deleteTask('${task._id}')">❌</button>
+      <button class="complete-btn" onclick='toggleTask("${task._id}")'>✔</button>
+      <button class="delete-btn" onclick='deleteTask("${task._id}")'>❌</button>
     `;
 
     taskList.appendChild(li);
@@ -106,28 +126,52 @@ li.addEventListener("dragend", () => {
 // ➕ ADD TASK
 async function addTask() {
   const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = "Adding...";
 
   try {
     const text = document.getElementById("taskInput").value.trim();
     const priority = document.getElementById("priority").value;
     const dueDateValue = document.getElementById("dueDate").value;
 
-    await fetch("/tasks", {
+    // ✅ STEP 1 — validate BEFORE disabling
+    if (!text) {
+      alert("Task cannot be empty");
+      return;
+    }
+
+    // ✅ STEP 2 — now disable button
+    btn.disabled = true;
+    btn.textContent = "Adding...";
+
+    // ✅ STEP 3 — send request
+    const res = await fetch("/tasks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ text, priority, dueDate: dueDateValue })
+      body: JSON.stringify({
+        text,
+        priority,
+        dueDate: dueDateValue,
+      }),
     });
 
+    // ✅ STEP 4 — check response
+    if (!res.ok) {
+      throw new Error("Failed to add task");
+    }
+
+    // ✅ STEP 5 — clear inputs
     document.getElementById("taskInput").value = "";
+    document.getElementById("dueDate").value = "";
+
+    // ✅ STEP 6 — refresh list
     fetchTasks();
+
   } catch (err) {
     alert("Failed to add task");
   } finally {
+    // ✅ STEP 7 — always re-enable button
     btn.disabled = false;
     btn.textContent = "Add Task";
   }
@@ -135,20 +179,42 @@ async function addTask() {
 
 // ✅ TOGGLE
 async function toggleTask(id) {
-  await fetch(`/tasks/${id}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  fetchTasks();
+  try {
+    const res = await fetch(`/tasks/${id}/toggle`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Toggle failed");
+
+    fetchTasks();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to toggle task");
+  }
 }
 
 // ❌ DELETE
 async function deleteTask(id) {
-  await fetch(`/tasks/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  fetchTasks();
+  try {
+    const res = await fetch(`/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Delete failed");
+    }
+
+    fetchTasks(); // refresh list
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete task");
+  }
 }
 
 // 🔄 AUTO LOGIN
@@ -157,11 +223,11 @@ if (token) {
 }
 
 function toggleTheme() {
-  document.body.classList.toggle("light");
+  document.body.classList.toggle("dark");
 
-  const mode = document.body.classList.contains("light")
-    ? "light"
-    : "dark";
+  const mode = document.body.classList.contains("dark")
+    ? "dark"
+    : "light";
 
   localStorage.setItem("theme", mode);
 }
@@ -169,7 +235,7 @@ function toggleTheme() {
 // load saved theme
 (function () {
   const saved = localStorage.getItem("theme");
-  if (saved === "light") document.body.classList.add("light");
+  if (saved === "dark") document.body.classList.add("dark");
 })();
 
 function getDragAfterElement(container, y) {
