@@ -16,6 +16,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskList = document.getElementById("taskList");
   const dashboardHeader = document.getElementById("dashboard-header");
 
+  const dueDateInput = document.getElementById("due-date");
+
+if (dueDateInput) {
+  const today = new Date();
+  const maxYear = today.getFullYear() + 5; // allow next 5 years
+
+  dueDateInput.min = today.toISOString().split("T")[0];
+  dueDateInput.max = `${maxYear}-12-31`;
+}
+
   // ===== DARK MODE TOGGLE (UI WIRING) =====
   const themeToggle = document.getElementById("theme-toggle");
   const themeToggleAuth = document.getElementById("theme-toggle-auth");
@@ -286,30 +296,48 @@ document.addEventListener("DOMContentLoaded", () => {
   async function resetPassword() {
     alert("Reset password feature coming soon.");
   }
+
   window.toggleTask = async function(id) {
-    try {
-      const res = await fetch(`/tasks/${id}/toggle`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error("Toggle failed");
-      fetchTasks();
-    } catch (err) {
-      alert("Failed to toggle task");
-    }
-  };
+  try {
+    const res = await fetch(`/tasks/${id}/toggle`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+
+    if (!res.ok) throw new Error("Toggle failed");
+
+    // ✅ update only this task (NO full refresh)
+    const taskEl = document.querySelector(`[data-id="${id}"]`);
+    taskEl?.classList.toggle("completed");
+
+  } catch (err) {
+    alert("Failed to toggle task");
+  }
+};
+
   window.deleteTask = async function(id) {
-    try {
-      const res = await fetch(`/tasks/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error("Delete failed");
-      fetchTasks();
-    } catch (err) {
-      alert("Failed to delete task");
-    }
-  };
+  try {
+    // ✅ save current page scroll
+    const scrollY = window.scrollY;
+
+    const res = await fetch(`/tasks/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+
+    if (!res.ok) throw new Error("Delete failed");
+
+    // ✅ remove only that task
+    const taskEl = document.querySelector(`[data-id="${id}"]`);
+    taskEl?.remove();
+
+    // ✅ restore scroll position (KEY FIX)
+    window.scrollTo(0, scrollY);
+
+  } catch (err) {
+    alert("Failed to delete task");
+  }
+};
   function getDueStatus(dueDate, completed) {
     if (completed) return "done";
     if (!dueDate) return "normal";

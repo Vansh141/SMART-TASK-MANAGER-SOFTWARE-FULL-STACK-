@@ -3,75 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Task Manager</title>
+  <title>Dashboard | Smart Task Manager</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Redirect if not logged in
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login.html";
+    }
+  </script>
 </head>
 <body>
   <!-- Header/Navbar -->
   <header>
     <nav class="navbar">
       <div class="navbar-logo">🧠 Smart Task Manager</div>
-      <div class="navbar-user" id="navbar-user" style="display:none;">
+      <div class="navbar-user" id="navbar-user">
         <span id="user-info"></span>
         <button class="navbar-btn" id="logout-btn">Logout</button>
         <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">🌙</button>
-      </div>
-      <div class="navbar-auth" id="navbar-auth">
-        <button class="theme-toggle" id="theme-toggle-auth" title="Toggle Theme">🌙</button>
       </div>
     </nav>
   </header>
 
   <main>
-    <!-- Authentication Section -->
-    <section id="auth-section">
-      <form id="register-form">
-        <h2>Register</h2>
-        <input type="text" id="register-name" placeholder="Name" required>
-        <input type="email" id="register-email" placeholder="Email" required autocomplete="email">
-        <input type="password" id="register-password" placeholder="Password" required autocomplete="new-password">
-        <button type="submit">Register</button>
-      </form>
-      <form id="login-form">
-        <h2>Login</h2>
-        <input type="email" id="login-email" placeholder="Email" required autocomplete="username">
-        <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
-        <button type="submit">Login</button>
-        <p><a href="#" id="show-forgot">Forgot Password?</a></p>
-      </form>
-      <form id="forgot-form" style="display:none;">
-        <h2>Forgot Password</h2>
-        <input type="email" id="forgot-email" placeholder="Enter your email" required>
-        <button type="submit">Send Reset Link</button>
-        <p><a href="#" id="back-login">Back to Login</a></p>
-      </form>
-      <form id="reset-form" style="display:none;">
-        <h2>Reset Password</h2>
-        <input type="password" id="reset-password" placeholder="New Password" required>
-        <button type="submit">Reset Password</button>
-      </form>
-    </section>
-
     <!-- Dashboard Section -->
-    <section id="dashboard-section" style="display:none;">
+    <section id="dashboard-section">
       <div id="dashboard-header" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-        <h2>Dashboard</h2>
+        <h2>My Tasks <span id="task-count" style="font-size: 0.9rem; color: var(--primary); background: rgba(79,70,229,0.1); padding: 4px 10px; border-radius: 20px;">0</span></h2>
       </div>
-      <form id="task-form">
-        <input type="text" id="task-title" placeholder="Task Title" required>
-        <textarea id="task-desc" placeholder="Task Description"></textarea>
-        <select id="priority">
-          <option value="Low">Low</option>
-          <option value="Medium" selected>Medium</option>
-          <option value="High">High</option>
-        </select>
-        <input type="date" id="due-date">
-        <button type="submit">Add Task</button>
-      </form>
-      <div id="loading" class="loading" style="display:none;">Loading tasks...</div>
-      <div id="empty-state" class="empty-state" style="display:none;">No tasks yet. Start by adding your first task!</div>
+      
+      <div class="top-bar">
+        <form id="task-form" class="task-form" style="margin-bottom: 0; box-shadow: none;">
+          <input type="text" id="task-title" placeholder="What needs to be done?" required autocomplete="off" style="flex: 1; min-width: 250px;">
+          <!-- <textarea id="task-desc" placeholder="Task Description" style="display: none;"></textarea> -->
+          <select id="priority" style="width: auto;">
+            <option value="Low">Low Priority</option>
+            <option value="Medium" selected>Medium Priority</option>
+            <option value="High">High Priority</option>
+          </select>
+          <input type="date" id="due-date" min="2000-01-01" max="2100-12-31" style="width: auto;">
+          <button type="submit" id="add-task-btn" style="white-space: nowrap;">✨ Add Task</button>
+        </form>
+      </div>
+      
+      <div class="divider"></div>
+
+      <div id="loading" class="loading" style="display:none;">
+        <svg class="spinner" viewBox="0 0 50 50">
+          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+        </svg>
+      </div>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <div style="font-size: 3rem; margin-bottom: 16px;">📂</div>
+        <h3>No tasks yet</h3>
+        <p>Start by adding your first task above!</p>
+      </div>
       <ul id="taskList" class="task-list"></ul>
     </section>
   </main>
@@ -86,9 +75,10 @@
       <a href="#" class="footer-link">About</a>
       <a href="#" class="footer-link">Contact</a>
     </div>
-    <div>&copy; 2026 Smart Task Manager. All rights reserved.</div>
+    <div style="opacity: 0.8; font-size: 0.9rem;">&copy; 2026 Smart Task Manager. All rights reserved.</div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>
