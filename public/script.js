@@ -18,13 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const dueDateInput = document.getElementById("due-date");
 
-if (dueDateInput) {
-  const today = new Date();
-  const maxYear = today.getFullYear() + 5; // allow next 5 years
+  if (dueDateInput) {
+    const today = new Date();
+    const maxYear = today.getFullYear() + 5; // allow next 5 years
 
-  dueDateInput.min = today.toISOString().split("T")[0];
-  dueDateInput.max = `${maxYear}-12-31`;
-}
+    dueDateInput.min = today.toISOString().split("T")[0];
+    dueDateInput.max = `${maxYear}-12-31`;
+  }
 
   // ===== DARK MODE TOGGLE (UI WIRING) =====
   const themeToggle = document.getElementById("theme-toggle");
@@ -38,13 +38,13 @@ if (dueDateInput) {
   applyTheme(savedTheme);
 
   function applyTheme(theme) {
-  document.body.classList.toggle("dark", theme === "dark");
-  localStorage.setItem("theme", theme);
+    document.body.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
 
-  const icon = theme === "dark" ? "☀️" : "🌙";
-  if (themeToggle) themeToggle.textContent = icon;
-  if (themeToggleAuth) themeToggleAuth.textContent = icon;
-}
+    const icon = theme === "dark" ? "☀️" : "🌙";
+    if (themeToggle) themeToggle.textContent = icon;
+    if (themeToggleAuth) themeToggleAuth.textContent = icon;
+  }
 
   function toggleTheme() {
     const isDark = document.body.classList.contains("dark");
@@ -117,26 +117,26 @@ if (dueDateInput) {
     showTasks();
   }
   if (taskList) {
-  taskList.addEventListener("dragover", (e) => {
-    const dragging = document.querySelector(".dragging");
+    taskList.addEventListener("dragover", (e) => {
+      const dragging = document.querySelector(".dragging");
 
-    // ✅ DO NOTHING if not actively dragging
-    if (!dragging) return;
+      // ✅ DO NOTHING if not actively dragging
+      if (!dragging) return;
 
-    e.preventDefault();
+      e.preventDefault();
 
-    const afterElement = getDragAfterElement(taskList, e.clientY);
+      const afterElement = getDragAfterElement(taskList, e.clientY);
 
-    // ✅ prevent useless DOM moves
-    if (!afterElement) {
-      if (dragging !== taskList.lastElementChild) {
-        taskList.appendChild(dragging);
+      // ✅ prevent useless DOM moves
+      if (!afterElement) {
+        if (dragging !== taskList.lastElementChild) {
+          taskList.appendChild(dragging);
+        }
+      } else if (afterElement !== dragging.nextSibling) {
+        taskList.insertBefore(dragging, afterElement);
       }
-    } else if (afterElement !== dragging.nextSibling) {
-      taskList.insertBefore(dragging, afterElement);
-    }
-  });
-}
+    });
+  }
   function showTasks() {
     if (authSection) authSection.style.display = "none";
     if (dashboardSection) dashboardSection.style.display = "block";
@@ -182,9 +182,11 @@ if (dueDateInput) {
         <strong>${task.text}</strong><br>
         Priority: ${task.priority} | Due: ${task.dueDate || "None"}<br>
 
-        <button type="button" class="complete-btn" onclick="toggleTask('${task._id}')">✔</button>
-        <button type="button" class="delete-btn" onclick="deleteTask('${task._id}')">✖</button>
+        <button type="button" class="complete-btn">✔</button>
+        <button type="button" class="delete-btn">✖</button>
         `;
+        li.querySelector('.complete-btn').addEventListener('click', () => window.toggleTask(task._id));
+        li.querySelector('.delete-btn').addEventListener('click', () => window.deleteTask(task._id));
         fragment.appendChild(li);
       });
       taskList.appendChild(fragment);
@@ -297,54 +299,54 @@ if (dueDateInput) {
     alert("Reset password feature coming soon.");
   }
 
-  window.toggleTask = async function(id) {
-  try {
-    const res = await fetch(`/tasks/${id}/toggle`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+  window.toggleTask = async function (id) {
+    try {
+      const res = await fetch(`/tasks/${id}/toggle`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
 
-    if (!res.ok) throw new Error("Toggle failed");
+      if (!res.ok) throw new Error("Toggle failed");
 
-    // ✅ update only this task (NO full refresh)
-    const taskEl = document.querySelector(`[data-id="${id}"]`);
-    taskEl?.classList.toggle("completed");
+      // ✅ update only this task (NO full refresh)
+      const taskEl = document.querySelector(`[data-id="${id}"]`);
+      taskEl?.classList.toggle("completed");
 
-  } catch (err) {
-    alert("Failed to toggle task");
-  }
-};
+    } catch (err) {
+      alert("Failed to toggle task");
+    }
+  };
 
-  window.deleteTask = async function(id) {
-  try {
-    // ✅ save current page scroll
-    const scrollY = window.scrollY;
+  window.deleteTask = async function (id) {
+    try {
+      // ✅ save current page scroll
+      const scrollY = window.scrollY;
 
-    const res = await fetch(`/tasks/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+      const res = await fetch(`/tasks/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
 
-    if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error("Delete failed");
 
-    // ✅ remove only that task
-    const taskEl = document.querySelector(`[data-id="${id}"]`);
-    taskEl?.remove();
+      // ✅ remove only that task
+      const taskEl = document.querySelector(`[data-id="${id}"]`);
+      taskEl?.remove();
 
-    // ✅ restore scroll position (KEY FIX)
-    window.scrollTo(0, scrollY);
+      // ✅ restore scroll position (KEY FIX)
+      window.scrollTo(0, scrollY);
 
-  } catch (err) {
-    alert("Failed to delete task");
-  }
-};
+    } catch (err) {
+      alert("Failed to delete task");
+    }
+  };
   function getDueStatus(dueDate, completed) {
     if (completed) return "done";
     if (!dueDate) return "normal";
     const today = new Date();
     const due = new Date(dueDate);
-    today.setHours(0,0,0,0);
-    due.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
     if (due < today) return "overdue";
     if (due.getTime() === today.getTime()) return "today";
     return "normal";

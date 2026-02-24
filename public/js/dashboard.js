@@ -115,10 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="task-meta">Priority: ${task.priority} | Due: ${task.dueDate || "None"}</div>
           </div>
           <div class="task-actions">
-            <button class="complete-btn" onclick="toggleTask('${task._id}')" title="Complete task">✔</button>
-            <button class="delete-btn" onclick="deleteTask('${task._id}')" title="Delete task">✖</button>
+            <button class="complete-btn" title="Complete task">✔</button>
+            <button class="delete-btn" title="Delete task">✖</button>
           </div>
         `;
+                li.querySelector('.complete-btn').addEventListener('click', () => window.toggleTask(task._id));
+                li.querySelector('.delete-btn').addEventListener('click', () => window.deleteTask(task._id));
                 fragment.appendChild(li);
             });
 
