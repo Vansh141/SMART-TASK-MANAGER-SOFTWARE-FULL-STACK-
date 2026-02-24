@@ -71,6 +71,27 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchTasks() {
         if (!taskList) return;
 
+        // Initialize drag and drop on the task list container if not already initialized
+        if (!taskList.dataset.dndInit) {
+            taskList.addEventListener("dragover", (e) => {
+                const dragging = document.querySelector(".dragging");
+                if (!dragging) return;
+
+                e.preventDefault();
+
+                const afterElement = getDragAfterElement(taskList, e.clientY);
+
+                if (!afterElement) {
+                    if (dragging !== taskList.lastElementChild) {
+                        taskList.appendChild(dragging);
+                    }
+                } else if (afterElement !== dragging.nextSibling) {
+                    taskList.insertBefore(dragging, afterElement);
+                }
+            });
+            taskList.dataset.dndInit = "true";
+        }
+
         loading.style.display = "flex";
         emptyState.style.display = "none";
         taskList.innerHTML = "";
@@ -108,6 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const li = document.createElement("li");
                 li.className = `task ${getDueStatus(task.dueDate, task.completed)} ${task.completed ? "completed" : ""}`;
                 li.setAttribute("data-id", task._id);
+                li.setAttribute("draggable", "true");
+
+                li.addEventListener("dragstart", () => {
+                    li.classList.add("dragging");
+                });
+
+                li.addEventListener("dragend", () => {
+                    li.classList.remove("dragging");
+                });
 
                 li.innerHTML = `
           <div class="task-content">
@@ -189,5 +219,25 @@ document.addEventListener("DOMContentLoaded", () => {
         if (due < today) return "overdue";
         if (due.getTime() === today.getTime()) return "today";
         return "normal";
+    }
+
+    // Helper for HTML5 drag and drop reordering
+    function getDragAfterElement(container, y) {
+        const draggableElements = [
+            ...container.querySelectorAll(".task:not(.dragging)")
+        ];
+
+        return draggableElements.reduce(
+            (closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+        ).element;
     }
 });
