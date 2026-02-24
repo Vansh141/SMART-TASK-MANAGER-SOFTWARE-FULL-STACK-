@@ -1,29 +1,9 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const sendEmail = async (options) => {
-    const smtpPort = process.env.SMTP_PORT || 465;
-
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: smtpPort,
-        secure: smtpPort == 465, // true for 465, false for other ports (like 587)
-        auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD,
-        },
-    });
-
-    const message = {
-        from: `${process.env.FROM_NAME || 'Smart Task Manager'} <${process.env.FROM_EMAIL || process.env.SMTP_EMAIL}>`,
-        to: options.email,
-        subject: options.subject,
-        html: options.htmlMessage, // Enhanced HTML Email support
-        text: options.message,     // Plaintext fallback
-    };
-
-    // Gracefully handle missing SMTP configurations for test environments
-    if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-        console.warn("\n⚠️ [MAIL MOCK] SMTP Credentials missing in .env!");
+    // Gracefully handle missing Resend configs for test environments
+    if (!process.env.RESEND_API_KEY) {
+        console.warn("\n⚠️ [MAIL MOCK] RESEND_API_KEY missing in .env!");
         console.log("-----------------------------------------");
         console.log(`To: ${options.email}`);
         console.log(`Subject: ${options.subject}`);
@@ -32,11 +12,25 @@ const sendEmail = async (options) => {
         return;
     }
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     try {
-        const info = await transporter.sendMail(message);
-        console.log("Email officially sent: %s", info.messageId);
+        const data = await resend.emails.send({
+            from: "Smart Task Manager <onboarding@resend.dev>",
+            to: options.email,
+            subject: options.subject,
+            html: options.htmlMessage, // Enhanced HTML Email support
+            text: options.message,     // Plaintext fallback
+        });
+
+        if (data.error) {
+            console.error("❌ Resend API Error: ", data.error);
+            throw new Error(data.error.message || "Email sending failed");
+        }
+
+        console.log("Email officially sent via Resend: %s", data.data.id);
     } catch (sendError) {
-        console.error("❌ Transporter SendMail Failed: ", sendError.message);
+        console.error("❌ Resend SendMail Failed: ", sendError.message);
         throw sendError; // Ensure it bubbles back to the controller
     }
 };

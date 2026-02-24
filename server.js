@@ -7,7 +7,7 @@ const errorHandler = require("./middleware/errorHandler");
 
 // Fail-Fast: Verify critical deployment variables before starting
 if (process.env.NODE_ENV === "production") {
-  const requiredEnv = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL", "SMTP_EMAIL", "SMTP_PASSWORD"];
+  const requiredEnv = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL", "RESEND_API_KEY"];
   const missing = requiredEnv.filter(env => !process.env[env]);
   if (missing.length > 0) {
     console.error(`[CRITICAL SERVER ERROR] Missing required environment variables in production: ${missing.join(", ")}`);
