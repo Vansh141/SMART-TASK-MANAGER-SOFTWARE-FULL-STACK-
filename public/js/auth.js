@@ -114,7 +114,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await res.json();
                 if (res.ok) {
                     showToast("Account created successfully!");
-                    localStorage.setItem("token", data.token);
+
+                    // Use the utility function to handle cross-session state
+                    if (typeof saveToken === "function") {
+                        saveToken(data.token, true);
+                    } else {
+                        localStorage.setItem("token", data.token);
+                    }
+
                     setTimeout(() => window.location.href = "/", 1000);
                 } else {
                     showToast(data.error || "Registration failed", true);
@@ -145,9 +152,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await res.json();
 
                 if (res.ok) {
-                    localStorage.setItem("token", data.token);
-                    // if "remember me" is not checked, token technically can't expire on session end automatically easily without secure cookies
-                    // For now, simple JWT token is kept
+                    const rememberMe = document.getElementById("remember-me")?.checked;
+
+                    // Delegate storage logic to utils.js explicitly so 'Remember Me' is respected
+                    if (typeof saveToken === "function") {
+                        saveToken(data.token, rememberMe);
+                    } else {
+                        if (rememberMe) {
+                            localStorage.setItem("token", data.token);
+                        } else {
+                            sessionStorage.setItem("token", data.token);
+                        }
+                    }
+
                     window.location.href = "/";
                 } else {
                     showToast(data.error || "Login failed", true);

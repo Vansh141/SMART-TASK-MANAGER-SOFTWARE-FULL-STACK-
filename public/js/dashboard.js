@@ -8,8 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener("click", () => {
-            localStorage.removeItem("token");
-            window.location.href = "/login.html";
+            if (typeof logout === "function") {
+                logout();
+            } else {
+                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
+                window.location.href = "/login.html";
+            }
         });
     }
 
@@ -103,7 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!res.ok) {
                 if (res.status === 401) {
+                    if (typeof logout === "function") {
+                        logout();
+                        return;
+                    }
                     localStorage.removeItem("token");
+                    sessionStorage.removeItem("token");
                     window.location.href = "/login.html";
                 }
                 throw new Error("Failed to fetch tasks");

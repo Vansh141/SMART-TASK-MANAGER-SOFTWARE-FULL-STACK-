@@ -1,6 +1,6 @@
 // ===== GLOBAL =====
 const API = "";
-function getToken() { return localStorage.getItem("token"); }
+function getToken() { return localStorage.getItem("token") || sessionStorage.getItem("token"); }
 
 document.addEventListener("DOMContentLoaded", () => {
   // ===== DOM REFERENCES =====
@@ -278,7 +278,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await res.json();
       if (res.ok && data.token) {
-        localStorage.setItem("token", data.token);
+        const rememberMe = document.getElementById("remember-me")?.checked;
+        if (rememberMe) {
+          localStorage.setItem("token", data.token);
+        } else {
+          sessionStorage.setItem("token", data.token);
+        }
         showTasks();
       } else {
         alert(data.message || "Login failed");
@@ -289,6 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function logout() {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     // If you have an in-memory token variable, clear it here as well
     location.reload();
   }

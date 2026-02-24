@@ -21,14 +21,18 @@ function showToast(msg, isError = false) {
  * Get the JWT token from storage
  */
 function getToken() {
-    return localStorage.getItem("token");
+    return localStorage.getItem("token") || sessionStorage.getItem("token");
 }
 
 /**
  * Save auth token
  */
-function saveToken(token) {
-    localStorage.setItem("token", token);
+function saveToken(token, rememberMe = false) {
+    if (rememberMe) {
+        localStorage.setItem("token", token);
+    } else {
+        sessionStorage.setItem("token", token);
+    }
 }
 
 /**
@@ -36,7 +40,9 @@ function saveToken(token) {
  */
 function logout() {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     window.location.href = "/login.html";
 }
 

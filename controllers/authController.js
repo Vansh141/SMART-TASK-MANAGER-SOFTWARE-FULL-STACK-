@@ -108,7 +108,15 @@ exports.forgotPassword = async (req, res, next) => {
         }
 
         // Create reset url dynamically based on environment
-        const clientUrl = process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`;
+        let clientUrl = process.env.CLIENT_URL;
+
+        // Add safe fallback handling if CLIENT_URL is missing or set to a placeholder like example.com
+        if (!clientUrl || clientUrl.includes("example.com")) {
+            const host = req.headers["x-forwarded-host"] || req.get("host");
+            const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+            clientUrl = `${protocol}://${host}`;
+        }
+
         const resetUrl = `${clientUrl}/reset-password.html?token=${resetToken}`;
 
         const message = `You are receiving this email because you (or someone else) requested a password reset. Please go to: \n\n ${resetUrl}`;
