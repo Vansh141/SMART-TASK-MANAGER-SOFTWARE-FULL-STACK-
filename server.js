@@ -20,6 +20,7 @@ const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/tasks");
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 
 // Security Hardening Middlewares
