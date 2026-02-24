@@ -176,11 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 const data = await res.json();
 
-                if (res.ok) {
-                    showToast(data.message || "If that email is in our database, we will send a reset link.");
-                } else {
-                    showToast(data.error || "Failed to process request", true);
-                }
+                // As requested, always show success to prevent email sweeping
+                showToast("If that email is in our database, we will send a reset link.");
             } catch (err) {
                 showToast("Something went wrong", true);
             } finally {
